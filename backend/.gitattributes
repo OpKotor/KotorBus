@@ -1,0 +1,35 @@
+# Ensures all text files use LF in the repository
+* text=auto eol=lf
+
+# Specific diff algorithms for certain file types
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+# Export-ignore for specific files and directories
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore
+
+# Force LF for specific file types
+*.php text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+
+# Optionally, keep CRLF for certain files (e.g., Windows batch scripts)
+*.bat text eol=crlf
+
+# Binary files (ensure no EOL normalization)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.exe binary
+*.dll binary
+*.bin binary

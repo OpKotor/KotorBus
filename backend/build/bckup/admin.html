@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kotorbus Admin</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-container { max-width: 600px; margin: 60px auto; background: #fff; padding: 32px; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+  <div class="admin-container" id="login-section">
+    <h2>Admin Login</h2>
+    <input type="text" id="admin-username" placeholder="Username"><br>
+    <input type="password" id="admin-password" placeholder="Password"><br>
+    <button onclick="adminLogin()">Login</button>
+    <p id="login-error" style="color:red; display:none;">Invalid credentials.</p>
+  </div>
+
+  <div class="admin-container" id="admin-section" style="display:none;">
+    <h2>Reservations</h2>
+    <table id="reservations-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Arrival</th>
+          <th>Departure</th>
+          <th>Company</th>
+          <th>Registration</th>
+          <th>Country</th>
+          <th>Email</th>
+          <th>Vehicle Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be inserted here -->
+      </tbody>
+    </table>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    function adminLogin() {
+      const username = document.getElementById('admin-username').value;
+      const password = document.getElementById('admin-password').value;
+      // Simple example, replace with real authentication
+      if (username === 'admin' && password === 'password') {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('admin-section').style.display = 'block';
+        fetchReservations();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+
+    function logout() {
+      document.getElementById('admin-section').style.display = 'none';
+      document.getElementById('login-section').style.display = 'block';
+    }
+
+    function fetchReservations() {
+      fetch('http://192.168.115.106:8000/api/reservations')
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('reservations-table').querySelector('tbody');
+          tbody.innerHTML = '';
+          data.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${r.date}</td>
+              <td>${r.arrival_time}</td>
+              <td>${r.departure_time}</td>
+              <td>${r.company}</td>
+              <td>${r.registration}</td>
+              <td>${r.country}</td>
+              <td>${r.email}</td>
+              <td>${r.vehicle_type}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+  </script>
+</body>
+</html>

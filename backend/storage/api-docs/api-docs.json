@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Slot Rezervacija API",
+    "version": "1.0.0",
+    "description": "API za rezervaciju slotova za iskrcaj/ukrcaj i administraciju"
+  },
+  "paths": {
+    "/slots/available": {
+      "get": {
+        "summary": "Pregled slobodnih slotova za određeni datum",
+        "parameters": [
+          { "name": "date", "in": "query", "required": true, "schema": { "type": "string", "format": "date" } },
+          { "name": "vehicle_type", "in": "query", "required": false, "schema": { "type": "string", "enum": ["A","B","C"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista slobodnih slotova",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Slot" } } } }
+          }
+        }
+      }
+    },
+    "/slots/reserve": {
+      "post": {
+        "summary": "Rezerviši slot",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SlotReservation" } } }
+        },
+        "responses": {
+          "201": { "description": "Slot rezervisan", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Slot" } } } },
+          "409": { "description": "Slot nije dostupan" }
+        }
+      }
+    },
+    "/payments/start": {
+      "post": {
+        "summary": "Pokreni proces plaćanja",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentRequest" } } }
+        },
+        "responses": {
+          "200": { "description": "Link za plaćanje", "content": { "application/json": { "schema": { "type": "object", "properties": { "payment_url": { "type": "string" } } } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Slot": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "datum": { "type": "string", "format": "date" },
+          "vrijeme_od": { "type": "string", "example": "08:00" },
+          "vrijeme_do": { "type": "string", "example": "08:30" },
+          "slobodno_mjesta": { "type": "integer" }
+        }
+      },
+      "SlotReservation": {
+        "type": "object",
+        "properties": {
+          "naziv": { "type": "string", "description": "Firma ili ime fizičkog lica" },
+          "drzava": { "type": "string" },
+          "reg_oznaka": { "type": "string" },
+          "tip_vozila": { "type": "string", "enum": ["A","B","C"] },
+          "datum": { "type": "string", "format": "date" },
+          "vrijeme_od": { "type": "string", "example": "08:00" },
+          "vrijeme_do": { "type": "string", "example": "08:30" },
+          "email": { "type": "string", "format": "email" }
+        },
+        "required": ["naziv", "drzava", "reg_oznaka", "tip_vozila", "datum", "vrijeme_od", "vrijeme_do"]
+      },
+      "PaymentRequest": {
+        "type": "object",
+        "properties": {
+          "slot_id": { "type": "integer" },
+          "amount": { "type": "number" },
+          "method": { "type": "string", "enum": ["card", "paypal", "voucher"] }
+        },
+        "required": ["slot_id", "amount", "method"]
+      }
+    }
+  }
+}

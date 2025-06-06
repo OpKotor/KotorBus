@@ -1,0 +1,23 @@
+# Laravel specific files and directories to ignore
+.env
+
+/vendor
+/node_modules
+/storage/*.key
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/views
+/public/storage
+
+# Ignore IDE configuration files
+.idea/
+.vscode/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore debugging and testing artifacts
+npm-debug.log*
+yarn-error.log*
