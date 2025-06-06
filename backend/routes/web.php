@@ -54,7 +54,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 // === GLOBAL CATCH-ALL RUTA NA SAMOM KRAJU web.php ===
-Route::get('/{any}', function () {
+ Route::get('/{any}', function () {
     $path = base_path('build/index.html');
     if (!file_exists($path)) {
         abort(404, 'index.html not found');

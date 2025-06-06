@@ -18,7 +18,7 @@ class ReportController extends Controller
     public function sendDailyFinance(ReportService $service)
     {
         $date = now()->toDateString();
-        $finance = $service->dailyFinance($date);
+        $finance = $service->dailyFinancialReport($date);
         $count = $service->dailyCount($date);
         $emails = [
             'prihodi@kotor.me',
@@ -34,12 +34,14 @@ class ReportController extends Controller
     {
         $date = Carbon::yesterday()->toDateString();
         $reservationsByType = $service->dailyVehicleReservationsByType($date);
+        // Dodaj za debug:
+        // dd($reservationsByType, gettype($reservationsByType));
         $emails = [
             'prihodi@kotor.me',
             'mirjana.grbovic@kotor.me',
         ];
         foreach ($emails as $email) {
-            Mail::to($email)->send(new DailyVehicleReservationReportMail($date, $reservationsByType));
+            Mail::to($email)->send(new DailyVehicleReservationReportMail($reservationsByType, $date));
         }
         return response()->json(['status' => 'Dnevni izvještaj po tipu vozila je poslat!']);
     }
@@ -49,7 +51,7 @@ class ReportController extends Controller
         $date = Carbon::now()->subMonth();
         $month = $date->month;
         $year = $date->year;
-        $finance = $service->monthlyFinance($month, $year);
+        $finance = $service->monthlyFinancialReport($month, $year);
         $emails = [
             'prihodi@kotor.me',
             'mirjana.grbovic@kotor.me',
@@ -78,8 +80,8 @@ class ReportController extends Controller
     public function sendYearlyFinance(ReportService $service)
     {
         $year = Carbon::now()->subYear()->year;
-        $financePerMonth = $service->yearlyFinance($year);
-        $totalFinance = $financePerMonth->sum('prihod');
+        $financePerMonth = $service->yearlyFinancialReport($year); // treba da bude kolekcija!
+        $totalFinance = is_object($financePerMonth) ? $financePerMonth->sum('prihod') : 0;
         $emails = [
             'prihodi@kotor.me',
             'mirjana.grbovic@kotor.me',
