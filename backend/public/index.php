@@ -5,15 +5,9 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Determine if the application is in maintenance mode...
+// Laravel maintenance mode
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;
-}
-
-// Servira statički HTML fajl
-if (file_exists('index.html')) {
-    readfile('index.html');
-    exit;
 }
 
 // Register the Composer autoloader...
