@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\PaymentController;
 
 // ======= JAVNE KORISNIČKE RUTE =======
 
@@ -45,6 +46,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('test-godisnji-finansijski', [ReportController::class, 'sendYearlyFinance']);
         Route::get('test-godisnji-vozila', [ReportController::class, 'sendYearlyVehicleReservations']);
     }
+
+    //========== RUTE ZA ONLINE PLAĆANJE ==========
+    Route::get('/payment', [PaymentController::class, 'showForm'])->name('payment.form');
+    Route::post('/payment/process', [PaymentController::class, 'process'])->name('payment.process');
+    Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+   
     // ========== KRAJ TEST/DEV RUTA ==========
 
     // OVA RUTA MORA BITI NA SAMOM KRAJU ADMIN GRUPE!

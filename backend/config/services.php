@@ -39,4 +39,9 @@ return [
         ],
     ],
 
+    'payment_gateway' => [
+        'sandbox_url' => env('PAYMENT_GATEWAY_SANDBOX_URL'),
+        'production_url' => env('PAYMENT_GATEWAY_PRODUCTION_URL'),
+        'api_key' => env('PAYMENT_GATEWAY_API_KEY'),
+    ],
 ];
