@@ -1,4 +1,4 @@
-<form id="payment-form" method="POST" action="/process-payment">
+<form id="payment-form">
   <input type="text" name="card_number" placeholder="Card Number" required /><br/>
   <input type="text" name="exp_month" placeholder="MM" required maxlength="2" style="width: 50px;"/>
   <input type="text" name="exp_year" placeholder="YY" required maxlength="2" style="width: 50px;"/>
@@ -8,15 +8,35 @@
 </form>
 <div id="payment-result"></div>
 <script>
+const CSRF_TOKEN = 'QvfNezVoOGu65W0CmVX3sM2VdQ7bsJL7Fgm65OGj';
+
+function encodeFormData(data) {
+    return Array.from(data.entries()).map(
+        ([key, value]) => encodeURIComponent(key) + '=' + encodeURIComponent(value)
+    ).join('&');
+}
+
 document.getElementById('payment-form').onsubmit = async function(e) {
     e.preventDefault();
     const form = e.target;
-    const data = new FormData(form);
-    const res = await fetch(form.action, {
-        method: "POST",
-        body: data
+    const formData = new FormData(form);
+
+    const res = await fetch('/procesiraj-placanje', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: encodeFormData(formData)
     });
-    const json = await res.json();
-    document.getElementById('payment-result').innerText = json.message;
+
+    let json;
+    try {
+        json = await res.json();
+    } catch (err) {
+        document.getElementById('payment-result').innerText = "Greška u komunikaciji sa serverom.";
+        return;
+    }
+    document.getElementById('payment-result').innerText = json.message || JSON.stringify(json);
 };
 </script>

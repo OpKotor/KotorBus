@@ -1,3 +1,6 @@
+// === Na vrh dodaj CSRF token koji si izvukao iz Laravel-a ===
+const CSRF_TOKEN = 'QvfNezVoOGu65W0CmVX3sM2VdQ7bsJL7Fgm65OGj';
+
 document.addEventListener('DOMContentLoaded', function () {
   setLanguage('en'); // or 'mne' if you want Montenegrin by default
 
@@ -65,43 +68,45 @@ document.addEventListener('DOMContentLoaded', function () {
     return slots;
   }
 
-function fetchAllTimeSlots() {
-  fetch('/api/time-slots')
-    .then(res => res.json())
-    .then(data => {
-      // Example: log to console or display in a table
-      console.log(data);
-      
-    });
-}
+  function fetchAllTimeSlots() {
+    fetch('/api/time-slots')
+      .then(res => res.json())
+      .then(data => {
+        // Example: log to console or display in a table
+        console.log(data);
+      });
+  }
 
-function fetchReservedSlots(date, callback) {
-  fetch('/api/timeslots/available?date=' + encodeURIComponent(date), {
-    headers: {
-      'Accept': 'application/json'
-    }
-  })
-    .then(res => {
-      if (!res.ok) throw new Error('Network response was not ok');
-      return res.json();
+  function fetchReservedSlots(date, callback) {
+    fetch('/api/timeslots/available?date=' + encodeURIComponent(date), {
+      headers: {
+        'Accept': 'application/json'
+      }
     })
-    .then(data => callback(data))
-    .catch(() => callback([]));
-}
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then(data => callback(data))
+      .catch(() => callback([]));
+  }
 
-function fetchAvailableSlotsForDate(date, callback) {
-  fetch('/api/timeslots/available?date=' + encodeURIComponent(date))
-    .then(res => res.json())
-    .then(slots => {
-      callback(slots); // backend returns an array of available slots
-    });
-}
+  function fetchAvailableSlotsForDate(date, callback) {
+    fetch('/api/timeslots/available?date=' + encodeURIComponent(date))
+      .then(res => res.json())
+      .then(slots => {
+        callback(slots); // backend returns an array of available slots
+      });
+  }
 
   document.getElementById('reservation_date').addEventListener('change', function () {
     const date = this.value;
     fetchAvailableSlotsForDate(date, function(availableSlots) {
       populateTimeSlotSelect('arrival-time-slot', availableSlots.map(s => s.time_slot));
       populateTimeSlotSelect('departure-time-slot', availableSlots.map(s => s.time_slot));
+      // Re-attach listeners after repopulating
+      document.getElementById('arrival-time-slot').addEventListener('change', filterTimeSlots);
+      document.getElementById('departure-time-slot').addEventListener('change', filterTimeSlots);
     });
   });
 
@@ -120,6 +125,11 @@ function fetchAvailableSlotsForDate(date, callback) {
   document.getElementById('lang-cg').addEventListener('click', function() {
     setLanguage('mne');
   });
+
+  // Attach time slot filtering listeners initially
+  document.getElementById('arrival-time-slot').addEventListener('change', filterTimeSlots);
+  document.getElementById('departure-time-slot').addEventListener('change', filterTimeSlots);
+
 });
 
 async function reserveSlot() {
@@ -137,10 +147,10 @@ async function reserveSlot() {
   const slotsData = await slotsResponse.json();
   const slots = slotsData.data || slotsData;
   console.log('Vrijednost iz dropdown-a za dolazak:', arrivalTimeStr);
-console.log('Vrijednost iz dropdown-a za odlazak:', departureTimeStr);
-console.log('Svi slotovi sa backend-a:', slots);
+  console.log('Vrijednost iz dropdown-a za odlazak:', departureTimeStr);
+  console.log('Svi slotovi sa backend-a:', slots);
   const arrivalSlot = slots.find(slot => slot.time_slot.startsWith(arrivalTimeStr));
-const departureSlot = slots.find(slot => slot.time_slot.startsWith(departureTimeStr));
+  const departureSlot = slots.find(slot => slot.time_slot.startsWith(departureTimeStr));
 
   if (!arrivalSlot || !departureSlot) {
     alert('Could not find the selected time slot!');
@@ -162,17 +172,18 @@ const departureSlot = slots.find(slot => slot.time_slot.startsWith(departureTime
   fetch('/api/reservations/reserve', {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': CSRF_TOKEN
+    },
     body: JSON.stringify(data)
   })
   .then(res => res.json())
   .then(response => {
     if (response.success) {
-        alert('Reservation successful!');
+      alert('Reservation successful!');
     } else {
-        alert('Reservation failed!');
+      alert('Reservation failed!');
     }
   });
 }
@@ -338,19 +349,3 @@ function filterTimeSlots() {
     }
   }
 }
-
-// Attach listeners after populating selects
-document.getElementById('arrival-time-slot').addEventListener('change', filterTimeSlots);
-document.getElementById('departure-time-slot').addEventListener('change', filterTimeSlots);
-
-// When you repopulate the selects (e.g. on date change), also re-attach listeners:
-document.getElementById('reservation_date').addEventListener('change', function () {
-  const date = this.value;
-  fetchAvailableSlotsForDate(date, function(availableSlots) {
-    populateTimeSlotSelect('arrival-time-slot', availableSlots.map(s => s.time_slot));
-    populateTimeSlotSelect('departure-time-slot', availableSlots.map(s => s.time_slot));
-    // Re-attach listeners after repopulating
-    document.getElementById('arrival-time-slot').addEventListener('change', filterTimeSlots);
-    document.getElementById('departure-time-slot').addEventListener('change', filterTimeSlots);
-  });
-});

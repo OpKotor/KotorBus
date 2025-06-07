@@ -30,8 +30,6 @@ class PaymentController extends Controller
             'language'   => 'sr',
         ];
 
-        
-
         // Potpisivanje — prema Bankart dokumentaciji (implementiraj po zahtevu)
         $sharedSecret = config('services.bankart.shared_secret');
         $signature = hash_hmac('sha256', json_encode($payload, JSON_UNESCAPED_UNICODE), $sharedSecret);
@@ -50,6 +48,7 @@ class PaymentController extends Controller
 
         return back()->with('error', $data['message'] ?? 'Greška pri inicijalizaciji plaćanja.');
     }
+
     public function callback(Request $request)
     {
         $payload = $request->getContent();
@@ -72,5 +71,22 @@ class PaymentController extends Controller
         // $data['status'], $data['merchantTransactionId'], $data['amount'], itd.
 
         return response()->json(['status' => 'ok']);
+    }
+
+    /**
+     * Test metoda za simulaciju plaćanja.
+     * Poziva redirectToHpp sa test podacima.
+     */
+    public function test(Request $request)
+    {
+        // Test podaci
+        $testRequest = new Request([
+            'amount' => 10,
+            'email' => 'test@example.com',
+        ]);
+
+        // Možete koristiti direktno redirectToHpp ili simulirati kroz rutu
+        // Ovde koristimo redirectToHpp kao internu metodu
+        return $this->redirectToHpp($testRequest);
     }
 }
